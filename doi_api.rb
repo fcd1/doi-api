@@ -12,9 +12,14 @@ IDENTIFIER_STATUS = { public: 'public',
                       reserved: 'reserved',
                       unavailable: 'unavailable' }
 
+
+# ENDPOINT = 'https://ezid.cdlib.org' # current EZID endpoint
+# ENDPOINT = 'https://ez.datacite.org/' # DataCite EZID API endpoint
+ENDPOINT = 'https://ez.test.datacite.org/' # DataCite Test EZID API endpoint
+
 def get_identifier_metadata(identifier)
   request_uri = '/id/' + identifier
-  uri = URI('https://ezid.cdlib.org' + request_uri)
+  uri = URI(ENDPOINT + request_uri)
   request = Net::HTTP::Get.new uri.request_uri
   response = call_api(uri, request)
 end
@@ -30,7 +35,7 @@ def mint_identifier(shoulder,
   metadata['_target'] = target_url unless target_url.nil?
   metadata['_status'] = identifier_status
   request_uri = "/shoulder/#{shoulder}"
-  uri = URI('https://ezid.cdlib.org' + request_uri)
+  uri = URI(ENDPOINT + request_uri)
   request = Net::HTTP::Post.new uri.request_uri
   response = call_api(uri, request, metadata)
 end
@@ -38,7 +43,9 @@ end
 def call_api(uri, request, request_data = nil)
   request.body = make_anvl(request_data) unless request_data.nil?
   
-  request.basic_auth 'columbia', 'XXXXXXXXXXXXXX'
+  request.basic_auth 'DEMO.CUL', 'XXXXXXXXXXXXXX'
+  # request.basic_auth 'CUL.COLUMBIA', 'XXXXXXXXXXXXXX'
+  # request.basic_auth 'columbia', 'XXXXXXXXXXXXXX'
   request.add_field('Content-Type', 'text/plain; charset=UTF-8')
   result = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
     response = http.request(request)
