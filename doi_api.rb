@@ -40,10 +40,23 @@ def mint_identifier(shoulder,
   response = call_api(uri, request, metadata)
 end
 
+# metada_hash will contain the metadata, including the EZID internal metadata
+# The datacite metadata (in XML format) will stored as value under the key 'datacite'
+# For the EZID internal data, the key is the name of the element as given in the EZID API.
+# For example, the key used for the identifier status is the element name '_status'
+# Method returns true if the API call was successful (HTTP status code set to 200
+# in the response from the EZID server).
+def modify_identifier(identifier, metadata_hash)
+  request_uri = '/id/' + identifier
+  uri = URI(ENDPOINT + request_uri)
+  request = Net::HTTP::Post.new uri.request_uri
+  response = call_api(uri, request, metadata_hash)
+end
+
 def call_api(uri, request, request_data = nil)
   request.body = make_anvl(request_data) unless request_data.nil?
   
-  request.basic_auth 'DEMO.CUL', 'XXXXXXXXXXXXXX'
+  request.basic_auth 'DEMO.CUL', 'XXXXXXXXXXXXXXXXXXXXX'
   # request.basic_auth 'CUL.COLUMBIA', 'XXXXXXXXXXXXXX'
   # request.basic_auth 'columbia', 'XXXXXXXXXXXXXX'
   request.add_field('Content-Type', 'text/plain; charset=UTF-8')
@@ -75,11 +88,11 @@ def datacite_xml(
       pub_year = '2018',
       date_created = '2018-12-4',
       date_modified = '2018-12-4',
-      creators = [],
-      subjects = [],
-      editors = [],
-      moderators = [],
-      contributors = [],
+      creators = ['Creator, Alfred','Creator, Barbara'],
+      subjects = ['subajecta','subbjectb'],
+      editors = ['Editora, Anna', 'Editorb, Bob'],
+      moderators = ['Moderatora, Andrew', 'Moderatorb, Beth'],
+      contributors = ['Contributora, Allison', 'Contributorb, Brett'],
       abstract = 'Default Abstract Value A'
     )
   builder = Nokogiri::XML::Builder.new do |xml|
